@@ -1,5 +1,5 @@
 +++
-title = "Understand performance with Google Benchmark"
+title = "Look ma, no CUDA!"
 outputs = ["Reveal"]
 [reveal_hugo]
 theme = "white"
@@ -8,9 +8,9 @@ transition = "slide"
 transition_speed = "fast"
 +++
 
-# Understanding performance with Google Benchmark
+# Look ma, no CUDA!
 
-Federico Ficarelli @ Meetup C++ 2018-12-13
+Federico Ficarelli @ Meetup C++ 2019-??-??
 
 ---
 
