@@ -17,4 +17,6 @@ Please note that some submodules are needed to have all the stuff working proper
 
 ## Resources
 
-* [SYCL Standard Specification](https://www.khronos.org/registry/SYCL/) - to be a proper standard, you need a proper spec.
+* [Accelerating your C++ on GPU with SYCL by @tartanllama](https://blog.tartanllama.xyz/sycl/) - one of the nicest introductions around.
+* [SYCL 1.2.1 API Reference Card](https://www.khronos.org/files/sycl/sycl-12-reference-card.pdf) - print this and hang it on the wall next to the Picasso you just bought.
+* [SYCL Standard Specification](https://www.khronos.org/registry/SYCL/) - to be a proper standard, you need proper specs.
