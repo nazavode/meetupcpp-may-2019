@@ -4,3 +4,6 @@
 [submodule "examples/external/trisycl"]
 	path = examples/external/trisycl
 	url = git@github.com:triSYCL/triSYCL.git
+[submodule "examples/examples/external/triSYCL"]
+	path = examples/external/
+	url = git@github.com:nazavode/triSYCL.git
