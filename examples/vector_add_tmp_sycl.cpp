@@ -1,10 +1,12 @@
 #include <CL/sycl.hpp>
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <iostream>
+#include <random>
 #include <string>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
 using namespace cl;
 
@@ -22,23 +24,23 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
         sycl::queue queue;
 
         // Create buffers (views on a, b and result contiguous storage)
-        sycl::buffer<T> A{std::begin(a), std::begin(a) + std::size(result)};
-        sycl::buffer<T> B{std::begin(b), std::begin(b) + std::size(result)};
-        sycl::buffer<T> R{std::begin(result), std::end(result)};
+        sycl::buffer<T> A{std::data(a), std::size(result)};
+        sycl::buffer<T> B{std::data(b), std::size(result)};
+        sycl::buffer<T> R{std::data(result), std::size(result)};
 
         // The command group describing all operations needed for the kernel
         // execution
         queue.submit([&](sycl::handler& cgh) {
             // Get proper accessors to existing buffers by specifying
             // read/write intents
-            auto ka = A.get_access<sycl::access::mode::read>(cgh);
-            auto kb = B.get_access<sycl::access::mode::read>(cgh);
-            auto kr = R.get_access<sycl::access::mode::write>(cgh);
+            auto ka = A.template get_access<sycl::access::mode::read>(cgh);
+            auto kb = B.template get_access<sycl::access::mode::read>(cgh);
+            auto kr = R.template get_access<sycl::access::mode::write>(cgh);
 
             // Enqueue a single, scalar task
             cgh.single_task<add_kernel_tag<T>>([=]() {  // Be sure to capture by value!
                 std::transform(std::begin(ka), std::end(ka), std::begin(kb),
-                               std::begin(kresult), std::plus<T>{});
+                               std::begin(kr), std::plus<T>{});
             });
         });  // End of our commands for this queue
     }        // End scope, so we wait for the queue to complete
@@ -52,10 +54,10 @@ std::vector<T> make_dataset(std::size_t size) {
     static auto distribution = [] {
         if constexpr (std::is_floating_point_v<T>) {
             return std::uniform_real_distribution<T>{std::numeric_limits<T>::min(),
-                                                     std::numeric_limits<T>::max()};
+                                                     std::numeric_limits<T>::max() / 2};
         } else {
             return std::uniform_int_distribution<T>{std::numeric_limits<T>::min(),
-                                                    std::numeric_limits<T>::max()};
+                                                    std::numeric_limits<T>::max() / 2};
         }
     }();
     static std::default_random_engine generator;
@@ -71,7 +73,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     const auto count = std::stoll(argv[1]);
-    using element_type = float;
+    using element_type = int;
     const auto a = make_dataset<element_type>(count);
     const auto b = make_dataset<element_type>(count);
     const auto result = add(a, b);
@@ -88,7 +90,8 @@ int main(int argc, char** argv) {
     };
     for (decltype(std::size(result)) i = 0; i < std::size(result); ++i) {
         if (!equals(result[i], a[i] + b[i])) {
-            std::cerr << "diff at index " << i << std::endl;
+            std::cerr << "diff at index " << i << ": " << result[i]
+                      << " != " << a[i] + b[i] << std::endl;
             return 1;
         }
     }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
-project(meetupcpp2019 LANGUAGES CXX)
+project(meetupcpp2019 CXX)
 
 # Always enable generation of compilation database to
 # make clang tooling and vscode happy
@@ -13,4 +13,8 @@ set(MEETUPCPP_DEFAULT_WARNINGS
         W4>
 )
 
-include(GNUInstallDirs)
+set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL/include CACHE PATH "" FORCE)
+include(external/triSYCL/cmake/FindTriSYCL.cmake)
+
+add_executable(vector_add_tmp_sycl vector_add_tmp_sycl.cpp)
+add_sycl_to_target(vector_add_tmp_sycl)
