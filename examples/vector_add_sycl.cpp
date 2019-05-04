@@ -1,29 +1,29 @@
 #include <CL/sycl.hpp>
-#include <iostream>
-#include <vector>
-#include <string>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <type_traits>
 
 using namespace cl;
 
-template<typename T>
-struct add_kernel_tag{};
+template <typename T>
+struct add_kernel_tag {};
 
 template <typename T>
 std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
     // We are going to operate on the common indexes subset
-    const auto min_size = std::min(std::size(a), std::size(b));
-    if(min_size <= 0) return {};
+    std::vector<T> result(std::min(std::size(a), std::size(b)));
+    if (result.size() == 0) return {};
 
-    std::vector<T> result(min_size);
-
-    {   // Open a new scope to bind the lifetime of the command queue.
+    {  // Open a new scope to bind the lifetime of the command queue.
         // Queue's destructor will wait for all pending operations to complete.
         sycl::queue queue;
 
         // Create buffers (views on a, b and result contiguous storage)
-        sycl::buffer<T> A{std::begin(a), std::begin(a) + n_elements};
-        sycl::buffer<T> B{std::begin(b), std::begin(b) + n_elements};
+        sycl::buffer<T> A{std::begin(a), std::begin(a) + std::size(result)};
+        sycl::buffer<T> B{std::begin(b), std::begin(b) + std::size(result)};
         sycl::buffer<T> R{std::begin(result), std::end(result)};
 
         // The command group describing all operations needed for the kernel
@@ -37,12 +37,8 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
 
             // Enqueue a single, scalar task
             cgh.single_task<add_kernel_tag<T>>([=]() {  // Be sure to capture by value!
-                // for (size_t i = 0; i < min_size; ++i) kc[i] = ka[i] + kb[i];
-                std::transform(
-                        std::begin(ka), std::end(ka),
-                        std::begin(kb),
-                        std::begin(kresult),
-                        std::plus<T>{});
+                std::transform(std::begin(ka), std::end(ka), std::begin(kb),
+                               std::begin(kresult), std::plus<T>{});
             });
         });  // End of our commands for this queue
     }        // End scope, so we wait for the queue to complete
@@ -51,15 +47,26 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
     return result;
 }
 
-template<typename T>
+template <typename T>
 std::vector<T> make_dataset(std::size_t size) {
-    std::vector<T> result;
-    // Fill with garbage...
-    return result;
+    static auto distribution = [] {
+        if constexpr (std::is_floating_point_v<T>) {
+            return std::uniform_real_distribution<T>{std::numeric_limits<T>::min(),
+                                                     std::numeric_limits<T>::max()};
+        } else {
+            return std::uniform_int_distribution<T>{std::numeric_limits<T>::min(),
+                                                    std::numeric_limits<T>::max()};
+        }
+    }();
+    static std::default_random_engine generator;
+    std::vector<T> dataset(size);
+    std::generate(std::begin(dataset), std::end(dataset),
+                  [&]() { return distribution(generator); });
+    return dataset;
 }
 
 int main(int argc, char** argv) {
-    if(argc < 2) {
+    if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " <items count>" << std::endl;
         return 1;
     }
@@ -68,7 +75,21 @@ int main(int argc, char** argv) {
     const auto a = make_dataset<element_type>(count);
     const auto b = make_dataset<element_type>(count);
     const auto result = add(a, b);
-    std::cout << "Result:" << std::endl;
-    for (size_t i = 0; i != N; i++) std::cout << c[i] << " ";
-    std::cout << std::endl;
+    // Check correctness
+    const auto equals = [](element_type lhs, element_type rhs) {
+        if constexpr (std::is_floating_point_v<element_type>) {
+            // Quick and dirty, don't try this at home.
+            // If you really want to compare floating points in the real world, have a
+            // look here: https://www.itu.dk/~sestoft/bachelor/IEEE754_article.pdf
+            return std::abs(lhs - rhs) < std::numeric_limits<element_type>::epsilon();
+        } else {
+            return lhs == rhs;
+        }
+    };
+    for (decltype(std::size(result)) i = 0; i < std::size(result); ++i) {
+        if (!equals(result[i], a[i] + b[i])) {
+            std::cerr << "diff at index " << i << std::endl;
+            return 1;
+        }
+    }
 }
