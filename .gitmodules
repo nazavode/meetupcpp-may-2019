@@ -1,3 +1,6 @@
 [submodule "slides/themes/reveal-hugo"]
 	path = slides/themes/reveal-hugo
 	url = https://github.com/dzello/reveal-hugo.git
+[submodule "examples/external/trisycl"]
+	path = examples/external/trisycl
+	url = git@github.com:triSYCL/triSYCL.git
