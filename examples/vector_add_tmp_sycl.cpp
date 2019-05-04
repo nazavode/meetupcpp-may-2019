@@ -11,7 +11,7 @@
 using namespace cl;
 
 template <typename T>
-struct add_kernel_tag {};
+struct AddKernel {};
 
 template <typename T>
 std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
@@ -38,7 +38,7 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
             auto kr = R.template get_access<sycl::access::mode::write>(cgh);
 
             // Enqueue a single, scalar task
-            cgh.single_task<add_kernel_tag<T>>([=]() {  // Be sure to capture by value!
+            cgh.single_task<AddKernel<T>>([=]() {  // Be sure to capture by value!
                 std::transform(std::begin(ka), std::end(ka), std::begin(kb),
                                std::begin(kr), std::plus<T>{});
             });
