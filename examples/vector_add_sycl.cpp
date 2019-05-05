@@ -32,11 +32,11 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
             auto kb = B.get_access<sycl::access::mode::read>(cgh);
             auto kr = R.get_access<sycl::access::mode::write>(cgh);
 
-            // Enqueue a single, scalar task
-            cgh.single_task<class AddKernel>([=]() {  // Be sure to capture by value!
-                std::transform(std::begin(ka), std::end(ka), std::begin(kb),
-                               std::begin(kr), std::plus<>{});
-            });
+            // Enqueue parallel kernel
+            cgh.parallel_for<class AddKernel>(
+                std::size(result), [=](sycl::id<1> idx) {  // Be sure to capture by value!
+                    kr[idx] = ka[idx] + kb[idx];
+                });
         });  // End of our commands for this queue
     }        // End scope, so we wait for the queue to complete
     // Queue destructor has completed, results are now available

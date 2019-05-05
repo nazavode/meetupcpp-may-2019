@@ -19,7 +19,7 @@ template <typename T>
 std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
     // We are going to operate on the common indexes subset
     std::vector<T> result(std::min(std::size(a), std::size(b)));
-    if (result.size() == 0) return {};
+    if (std::size(result) == 0) return {};
 
     // Open a new scope to bind the lifetime of the command queue.
     {
