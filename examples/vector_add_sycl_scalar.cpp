@@ -1,11 +1,7 @@
 #include <CL/sycl.hpp>
 #include <algorithm>
-#include <cmath>
 #include <functional>
 #include <iostream>
-#include <random>
-#include <string>
-#include <type_traits>
 #include <vector>
 
 using namespace cl;
