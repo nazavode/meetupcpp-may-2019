@@ -13,11 +13,19 @@ set(MEETUPCPP_DEFAULT_WARNINGS
         W4>
 )
 
+# Enable vendored triSYCL
+# This will define the unary function: add_sycl_to_target(<target>)
 set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH "" FORCE)
 include(examples/external/triSYCL/cmake/FindTriSYCL.cmake)
 
-add_executable(vector_add_tmp_sycl_scalar examples/vector_add_tmp_sycl_scalar.cpp)
-add_sycl_to_target(vector_add_tmp_sycl_scalar)
+# Create targets for each example source file
+set(example_files
+    examples/vector_add_tmp_sycl.cpp
+    examples/vector_add_tmp_sycl_scalar.cpp)
 
-add_executable(vector_add_tmp_sycl examples/vector_add_tmp_sycl.cpp)
-add_sycl_to_target(vector_add_tmp_sycl)
+foreach(example_source IN LISTS example_files)
+    get_filename_component(example_target ${example_source} NAME_WE)
+    add_executable(${example_target} ${example_source})
+    target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
+    add_sycl_to_target(${example_target})
+endforeach()
