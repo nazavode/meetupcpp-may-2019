@@ -13,11 +13,11 @@ set(MEETUPCPP_DEFAULT_WARNINGS
         W4>
 )
 
-set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL/include CACHE PATH "" FORCE)
-include(external/triSYCL/cmake/FindTriSYCL.cmake)
+set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH "" FORCE)
+include(examples/external/triSYCL/cmake/FindTriSYCL.cmake)
 
-add_executable(vector_add_tmp_sycl_scalar vector_add_tmp_sycl_scalar.cpp)
+add_executable(vector_add_tmp_sycl_scalar examples/vector_add_tmp_sycl_scalar.cpp)
 add_sycl_to_target(vector_add_tmp_sycl_scalar)
 
-add_executable(vector_add_tmp_sycl vector_add_tmp_sycl.cpp)
+add_executable(vector_add_tmp_sycl examples/vector_add_tmp_sycl.cpp)
 add_sycl_to_target(vector_add_tmp_sycl)
