@@ -18,3 +18,6 @@ include(external/triSYCL/cmake/FindTriSYCL.cmake)
 
 add_executable(vector_add_tmp_sycl_scalar vector_add_tmp_sycl_scalar.cpp)
 add_sycl_to_target(vector_add_tmp_sycl_scalar)
+
+add_executable(vector_add_tmp_sycl vector_add_tmp_sycl.cpp)
+add_sycl_to_target(vector_add_tmp_sycl)
