@@ -34,7 +34,7 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
 
             // Enqueue parallel kernel
             cgh.parallel_for<class AddKernel>(
-                std::size(result), [=](sycl::id<1> idx) {  // Be sure to capture by value!
+                sycl::range<1>{std::size(result)}, [=](sycl::id<1> idx) {  // Be sure to capture by value!
                     kr[idx] = ka[idx] + kb[idx];
                 });
         });  // End of our commands for this queue

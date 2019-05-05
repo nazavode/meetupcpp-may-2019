@@ -6,6 +6,14 @@ project(meetupcpp2019 CXX)
 # make clang tooling and vscode happy
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile commands database" FORCE)
 
+set(MEETUPCPP_SYCL_SUPPORTED_VALUES triSYCL ComputeCpp)
+set(MEETUPCPP_SYCL triSYCL CACHE STRING "SYCL implementation to be used")
+set_property(CACHE MEETUPCPP_SYCL PROPERTY STRINGS ${MEETUPCPP_SYCL_SUPPORTED_VALUES})
+if(NOT MEETUPCPP_SYCL IN_LIST MEETUPCPP_SYCL_SUPPORTED_VALUES)
+    message(FATAL_ERROR "MEETUPCPP_SYCL must be one of ${MEETUPCPP_SYCL_SUPPORTED_VALUES}")
+endif()
+message(STATUS "SYCL implementation is: ${MEETUPCPP_SYCL}")
+
 set(MEETUPCPP_DEFAULT_WARNINGS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
         -Werror -Wall -Wextra -pedantic-errors>
@@ -13,10 +21,23 @@ set(MEETUPCPP_DEFAULT_WARNINGS
         W4>
 )
 
-# Enable vendored triSYCL
+#
+# Setup the selected SYCL implementation
 # This will define the unary function: add_sycl_to_target(<target>)
-set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH "" FORCE)
-include(examples/external/triSYCL/cmake/FindTriSYCL.cmake)
+#
+
+if (MEETUPCPP_SYCL MATCHES "^triSYCL$")
+    # Enable vendored triSYCL
+    set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH "" FORCE)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/cmake)
+    find_package(triSYCL REQUIRED)
+endif()
+
+if (MEETUPCPP_SYCL MATCHES "^ComputeCpp$")
+    set(COMPUTECPP_BITCODE ptx64 CACHE STRING "" FORCE)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+    find_package(ComputeCpp REQUIRED)
+endif()
 
 # Create targets for each example source file
 set(example_files
