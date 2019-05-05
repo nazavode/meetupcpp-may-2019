@@ -20,6 +20,7 @@ include(examples/external/triSYCL/cmake/FindTriSYCL.cmake)
 
 # Create targets for each example source file
 set(example_files
+    examples/vector_add_sycl_scalar.cpp
     examples/vector_add_tmp_sycl.cpp
     examples/vector_add_tmp_sycl_scalar.cpp)
 
