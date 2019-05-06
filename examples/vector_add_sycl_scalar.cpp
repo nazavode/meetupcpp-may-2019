@@ -6,7 +6,9 @@
 
 using namespace cl;
 
-namespace {
+// Kernel type tag, be sure to declare it (forward is fine)
+// in an externally accessible namespace (e.g.: no anonymous)
+class AddKernel;
 
 std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     // We are going to operate on the common indexes subset
@@ -33,7 +35,7 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
             auto kr = R.get_access<sycl::access::mode::write>(cgh);
 
             // Enqueue a single, scalar task
-            cgh.single_task<class AddKernel>([=]() {  // Be sure to capture by value!
+            cgh.single_task<AddKernel>([=]() {  // Be sure to capture by value!
                 std::transform(std::begin(ka), std::end(ka), std::begin(kb),
                                std::begin(kr), std::plus<>{});
             });
@@ -53,8 +55,6 @@ std::vector<int> make_dataset(std::size_t size) {
     std::random_shuffle(std::begin(dataset), std::end(dataset));
     return dataset;
 }
-
-}  // namespace
 
 int main(int argc, char** argv) {
     if (argc < 2) {

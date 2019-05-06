@@ -10,8 +10,8 @@
 
 using namespace cl;
 
-namespace {
-
+// Kernel type tag, be sure to declare it (forward is fine)
+// in an externally accessible namespace (e.g.: no anonymous)
 template <typename T>
 struct AddKernel {};
 
@@ -42,7 +42,8 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
 
             // Enqueue parallel kernel
             cgh.parallel_for<AddKernel<T>>(
-                std::size(result), [=](sycl::id<1> idx) {  // Be sure to capture by value!
+                sycl::range<1>{std::size(result)},
+                [=](sycl::id<1> idx) {  // Be sure to capture by value!
                     kr[idx] = ka[idx] + kb[idx];
                 });
         });  // End of our commands for this queue
@@ -69,8 +70,6 @@ std::vector<T> make_dataset(std::size_t size) {
                   [&]() { return distribution(generator); });
     return dataset;
 }
-
-}  // namespace
 
 int main(int argc, char** argv) {
     if (argc < 2) {

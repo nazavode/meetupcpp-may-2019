@@ -10,8 +10,8 @@
 
 using namespace cl;
 
-namespace {
-
+// Kernel type tag, be sure to declare it (forward is fine)
+// in an externally accessible namespace (e.g.: no anonymous)
 template <typename T>
 struct AddKernel {};
 
@@ -69,8 +69,6 @@ std::vector<T> make_dataset(std::size_t size) {
                   [&]() { return distribution(generator); });
     return dataset;
 }
-
-}  // namespace
 
 int main(int argc, char** argv) {
     if (argc < 2) {
