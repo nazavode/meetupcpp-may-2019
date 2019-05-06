@@ -49,6 +49,11 @@ set(example_files
 foreach(example_source IN LISTS example_files)
     get_filename_component(example_target ${example_source} NAME_WE)
     add_executable(${example_target} ${example_source})
-    # target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
-    add_sycl_to_target(TARGET ${example_target} SOURCES ${example_source})
+    target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
+    if (MEETUPCPP_SYCL MATCHES "^ComputeCpp$")
+        # ComputeCpp helper needs named parameters
+        add_sycl_to_target(TARGET ${example_target} SOURCES ${example_source})
+    else()
+        add_sycl_to_target(${example_target})
+    endif()
 endforeach()
