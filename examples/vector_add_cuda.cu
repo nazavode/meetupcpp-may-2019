@@ -1,55 +1,59 @@
 #include <algorithm>
 #include <cstddef>
 #include <vector>
+#include <iterator>
+#include <string>
+#include <iostream>
 
 __global__ void add_kernel(const int* a, const int* b, int* result, int count) {
     // Get our global thread ID
     int id = blockIdx.x * blockDim.x + threadIdx.x;
 
-    // Make sure we do not go out of bounds
+    // Check for out of bounds threads
     if (id < count) {
-        c[id] = a[id] + b[id];
+        result[id] = a[id] + b[id];
     }
 }
 
 std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     // We are going to operate on the common indexes subset
-    std::vector<int> result(std::min(std::size(a), std::size(b)));
-    if (std::size(result) == 0) return {};
-    const auto byte_size = std::size(result) * sizeof(int);
+    std::vector<int> result(std::min(a.size(), b.size()));
+    if (result.size() == 0) return {};
 
     // Add some proper RAII to cuda resources
-    const auto make_unique_device =
-        [](std::size_t size) -> std::unique_ptr<int[], decltype(cudaFree)> {
-        void* ptr;
-        cudaMalloc(&ptr, size);
-        return {ptr, cudaFree};
+    auto make_device_buffer =
+        [](std::size_t size) {
+        int* ptr;
+        cudaMalloc(&ptr, size * sizeof(int));
+        return ptr;
     };
 
     // Device allocation
-    auto device_a = make_device_buffer(byte_size);
-    auto device_b = make_device_buffer(byte_size);
-    auto device_result = make_device_buffer(byte_size);
+    auto device_a = make_device_buffer(result.size());
+    auto device_b = make_device_buffer(result.size());
+    auto device_result = make_device_buffer(result.size());
 
     // Copy host vectors to device
-    cudaMemcpy(device_a.get(), std::data(host_a), byte_size, cudaMemcpyHostToDevice);
-    cudaMemcpy(device_b.get(), std::data(host_b), byte_size, cudaMemcpyHostToDevice);
-
-    int blockSize, gridSize;
+    cudaMemcpy(device_a, a.data(), result.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(device_b, b.data(), result.size() * sizeof(int), cudaMemcpyHostToDevice);
 
     // Number of threads in each thread block
-    blockSize = 1024;
+    const auto blockSize = 1024;
 
     // Number of thread blocks in grid
-    gridSize = (int)ceil((float)n / blockSize);
+    const auto gridSize = static_cast<int>(std::ceil(static_cast<float>(result.size()) / blockSize));
 
     // Execute the kernel
-    add_kernel<<<gridSize, blockSize>>>(device_a.get(), device_b.get(),
-                                        device_result.get(), count);
+    add_kernel<<<gridSize, blockSize>>>(device_a, device_b,
+                                        device_result, result.size());
 
     // Copy result back to host
-    cudaMemcpy(std::data(host_result), device_result.get(), byte_size,
+    cudaMemcpy(result.data(), device_result, result.size() * sizeof(int),
                cudaMemcpyDeviceToHost);
+
+    cudaFree(device_a);
+    cudaFree(device_b);
+    cudaFree(device_result);
 
     return result;
 }
@@ -77,10 +81,12 @@ int main(int argc, char* argv[]) {
     // Correctness check
     auto expected = std::vector<int>(count);
     std::transform(std::begin(a), std::end(a), std::begin(b), std::begin(expected),
-                   std::plus<>{});
-    auto [result_it, expected_it] =
+                   std::plus<int>{});
+    const auto diff =
         std::mismatch(std::begin(result), std::end(result), std::begin(expected),
                       [](auto a, auto b) { return a == b; });
+    const auto result_it = diff.first;
+    const auto expected_it = diff.second;
     if (result_it != std::end(result)) {
         const auto diff_idx = std::distance(std::begin(result), result_it);
         std::cerr << "diff at index " << diff_idx << ": " << *result_it
