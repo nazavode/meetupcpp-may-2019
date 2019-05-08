@@ -15,11 +15,32 @@ Federico Ficarelli @ Meetup C++ 2019-05-09
 
 ---
 
+<<<<<<< HEAD
 # No more free lunch
 
 * Mostrare evoluzione CPU/Moore's Law
 * Mostrare evoluzione potenze di calcolo
 * Frequenza -> parallelismo!
+=======
+### Free lunch is over
+
+![cpu-trends](42-years-processor-trend.png)
+
+---
+
+### Free lunch is over
+
+Power is the issue:
+
+* Increasing integration scale requires **more power** which generates **more heat**
+* 
+
+
+
+---
+
+![cpu-die-map](kaby_lake_die_map.png)
+>>>>>>> Add content to slide deck
 
 ---
 

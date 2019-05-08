@@ -44,7 +44,8 @@ set(example_files
     examples/vector_add_sycl_scalar.cpp
     examples/vector_add_sycl.cpp
     examples/vector_add_tmp_sycl.cpp
-    examples/vector_add_tmp_sycl_scalar.cpp)
+    examples/vector_add_tmp_sycl_scalar.cpp
+    examples/matrix_add_sycl.cpp)
 
 foreach(example_source IN LISTS example_files)
     get_filename_component(example_target ${example_source} NAME_WE)

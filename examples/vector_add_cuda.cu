@@ -20,28 +20,28 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     std::vector<int> result(std::min(a.size(), b.size()));
     if (result.size() == 0) return {};
 
-    // Add some proper RAII to cuda resources
-    auto make_device_buffer =
-        [](std::size_t size) {
-        int* ptr;
-        cudaMalloc(&ptr, size * sizeof(int));
-        return ptr;
-    };
+    const auto byte_size = result.size() * sizeof(int);
+
+    int* device_a = nullptr;
+    int* device_b = nullptr;
+    int* device_result = nullptr;
 
     // Device allocation
-    auto device_a = make_device_buffer(result.size());
-    auto device_b = make_device_buffer(result.size());
-    auto device_result = make_device_buffer(result.size());
+    cudaMalloc(&device_a, byte_size);
+    cudaMalloc(&device_b, byte_size);
+    cudaMalloc(&device_result, byte_size);
 
     // Copy host vectors to device
-    cudaMemcpy(device_a, a.data(), result.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(device_b, b.data(), result.size() * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(device_a, a.data(), byte_size, cudaMemcpyHostToDevice);
+    cudaMemcpy(device_b, b.data(), byte_size, cudaMemcpyHostToDevice);
 
     // Number of threads in each thread block
     const auto blockSize = 1024;
 
     // Number of thread blocks in grid
-    const auto gridSize = static_cast<int>(std::ceil(static_cast<float>(result.size()) / blockSize));
+    const auto gridSize = static_cast<int>(
+        std::ceil(static_cast<float>(result.size()) / blockSize)
+    );
 
     // Execute the kernel
     add_kernel<<<gridSize, blockSize>>>(device_a, device_b,
