@@ -9,8 +9,63 @@ transition_speed = "fast"
 +++
 
 # Look ma, no CUDA!
+## Programming GPUs with modern C++
 
-Federico Ficarelli @ Meetup C++ 2019-??-??
+Federico Ficarelli @ Meetup C++ 2019-05-09
+
+---
+
+# No more free lunch
+
+* Mostrare evoluzione CPU/Moore's Law
+* Mostrare evoluzione potenze di calcolo
+* Frequenza -> parallelismo!
+
+---
+
+# CPU vs GPU
+
+* Immagine integrati
+* Caratteristiche 
+* Dati FLOP/W
+
+---
+
+# Task vs Data parallelism
+
+Latency vs Throughput
+
+---
+
+# The paradygms zoo
+
+Tabella con paradigmi disponibili per C++
+
+---
+
+# CUDA
+
+---
+
+# Hello CUDA!
+
+* Schema di esecuzione
+
+# OpenCL
+
+---
+
+# SYCL
+
+---
+
+# Hello SYCL!
+
+---
+
+### Where to get SYCL
+
+![Implementations](sycl-targets.png)
 
 ---
 
