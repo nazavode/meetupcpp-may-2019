@@ -1,3 +1,9 @@
+#if defined(TRISYCL_OPENCL) && defined(__APPLE__)
+// TODO: OpenCL header on macOSX shows some weird macro explosion
+// during the expansion of the CL_DEPRECATED decorator macro that
+// should be investigated further. Just elide it for now.
+#define CL_SILENCE_DEPRECATION 1
+#endif
 #include <CL/sycl.hpp>
 #include <algorithm>
 #include <cmath>
