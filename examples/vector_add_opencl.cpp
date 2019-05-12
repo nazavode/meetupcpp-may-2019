@@ -1,20 +1,22 @@
-#define __CL_ENABLE_EXCEPTIONS
-
-#include <math.h>
-
-#include <cstdio>
-#include <cstdlib>
+#include <algorithm>
+#include <functional>
 #include <iostream>
+#include <cstring>
+#include <vector>
+#include <cmath>
+#include <cstddef>
 
-#include "cl.hpp"
+#define __CL_ENABLE_EXCEPTIONS
+#ifdef __APPLE__
+#include <OpenCL/cl.hpp>
+#else
+#include <CL/cl.hpp>
+#endif
 
-// OpenCL kernel. Each work item takes care of one element of c
-const char *kernelSource =
-    "\n"
-    "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n"
-    "__kernel void vecAdd(  __global double *a,                       \n"
-    "                       __global double *b,                       \n"
-    "                       __global double *c,                       \n"
+static const char* addKernelSource =
+    "__kernel void vecAdd(  __global int *a,                      \n"
+    "                       __global int *b,                      \n"
+    "                       __global int *c,                      \n"
     "                       const unsigned int n)                    \n"
     "{                                                               \n"
     "    //Get our global thread ID                                  \n"
@@ -23,110 +25,105 @@ const char *kernelSource =
     "    //Make sure we do not go out of bounds                      \n"
     "    if (id < n)                                                 \n"
     "        c[id] = a[id] + b[id];                                  \n"
-    "}                                                               \n"
-    "\n";
+    "}                                                               \n";
 
-int main(int argc, char *argv[]) {
-    // Length of vectors
-    unsigned int n = 1000;
+std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
+    // We are going to operate on the common indexes subset
+    std::vector<int> result(std::min(std::size(a), std::size(b)));
+    if (std::size(result) == 0) return {};
+    const auto size_bytes = std::size(result) * sizeof(int);
 
-    // Host input vectors
-    double *h_a;
-    double *h_b;
-    // Host output vector
-    double *h_c;
-
-    // Device input buffers
-    cl::Buffer d_a;
-    cl::Buffer d_b;
-    // Device output buffer
-    cl::Buffer d_c;
-
-    // Size, in bytes, of each vector
-    size_t bytes = n * sizeof(double);
-
-    // Allocate memory for each vector on host
-    h_a = new double[n];
-    h_b = new double[n];
-    h_c = new double[n];
-
-    // Initialize vectors on host
-    for (int i = 0; i < n; i++) {
-        h_a[i] = sinf(i) * sinf(i);
-        h_b[i] = cosf(i) * cosf(i);
+    // Query available platforms
+    std::vector<cl::Platform> platforms;
+    cl::Platform::get(&platforms);
+    if (platforms.size() == 0) {
+        throw std::runtime_error{"no OpenCL platforms available"};
     }
 
-    cl_int err = CL_SUCCESS;
-    try {
-        // Query platforms
-        std::vector<cl::Platform> platforms;
-        cl::Platform::get(&platforms);
-        if (platforms.size() == 0) {
-            std::cout << "Platform size 0\n";
-            return -1;
-        }
+    // Get list of devices on default platform and create context
+    cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
+                                          (cl_context_properties)(platforms[0])(), 0};
+    cl::Context context{CL_DEVICE_TYPE_GPU, properties};
+    std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
-        // Get list of devices on default platform and create context
-        cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
-                                              (cl_context_properties)(platforms[0])(), 0};
-        cl::Context context(CL_DEVICE_TYPE_GPU, properties);
-        std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+    // Create command queue for first device
+    auto err = CL_SUCCESS;
+    cl::CommandQueue queue{context, devices[0], 0, &err};
 
-        // Create command queue for first device
-        cl::CommandQueue queue(context, devices[0], 0, &err);
+    // Create device memory buffers
+    auto device_a = cl::Buffer{context, CL_MEM_READ_ONLY, size_bytes};
+    auto device_b = cl::Buffer{context, CL_MEM_READ_ONLY, size_bytes};
+    auto device_r = cl::Buffer{context, CL_MEM_WRITE_ONLY, size_bytes};
 
-        // Create device memory buffers
-        d_a = cl::Buffer(context, CL_MEM_READ_ONLY, bytes);
-        d_b = cl::Buffer(context, CL_MEM_READ_ONLY, bytes);
-        d_c = cl::Buffer(context, CL_MEM_WRITE_ONLY, bytes);
+    // Bind memory buffers
+    queue.enqueueWriteBuffer(device_a, CL_TRUE, 0, size_bytes, std::data(a));
+    queue.enqueueWriteBuffer(device_b, CL_TRUE, 0, size_bytes, std::data(b));
 
-        // Bind memory buffers
-        queue.enqueueWriteBuffer(d_a, CL_TRUE, 0, bytes, h_a);
-        queue.enqueueWriteBuffer(d_b, CL_TRUE, 0, bytes, h_b);
+    // Build kernel from source string
+    cl::Program::Sources source{1, std::make_pair(addKernelSource, std::strlen(addKernelSource))};
+    cl::Program program = cl::Program{context, source};
+    program.build(devices);
 
-        // Build kernel from source string
-        cl::Program::Sources source(1,
-                                    std::make_pair(kernelSource, strlen(kernelSource)));
-        cl::Program program_ = cl::Program(context, source);
-        program_.build(devices);
+    // Create kernel object
+    cl::Kernel kernel{program, "vecAdd", &err};
 
-        // Create kernel object
-        cl::Kernel kernel(program_, "vecAdd", &err);
+    // Bind kernel arguments to kernel
+    kernel.setArg(0, device_a);
+    kernel.setArg(1, device_b);
+    kernel.setArg(2, device_r);
+    kernel.setArg(3, std::size(result));
 
-        // Bind kernel arguments to kernel
-        kernel.setArg(0, d_a);
-        kernel.setArg(1, d_b);
-        kernel.setArg(2, d_c);
-        kernel.setArg(3, n);
+    // Number of work items in each local work group
+    cl::NDRange localSize{64};
+    // Number of total work items - localSize must be devisor
+    cl::NDRange globalSize{
+        static_cast<std::size_t>(std::ceil(std::size(result) / static_cast<float>(64)) * 64)};
 
-        // Number of work items in each local work group
-        cl::NDRange localSize(64);
-        // Number of total work items - localSize must be devisor
-        cl::NDRange globalSize((int)(ceil(n / (float)64) * 64));
+    // Enqueue kernel
+    cl::Event event;
+    queue.enqueueNDRangeKernel(kernel, cl::NullRange, globalSize, localSize, NULL,
+                               &event);
 
-        // Enqueue kernel
-        cl::Event event;
-        queue.enqueueNDRangeKernel(kernel, cl::NullRange, globalSize, localSize, NULL,
-                                   &event);
+    // Block until kernel completion
+    event.wait();
 
-        // Block until kernel completion
-        event.wait();
+    // Read back result
+    queue.enqueueReadBuffer(device_r, CL_TRUE, 0, size_bytes,
+                            std::data(result));
+    return result;
+}
 
-        // Read back d_c
-        queue.enqueueReadBuffer(d_c, CL_TRUE, 0, bytes, h_c);
-    } catch (cl::Error err) {
-        std::cerr << "ERROR: " << err.what() << "(" << err.err() << ")" << std::endl;
+std::vector<int> make_dataset(std::size_t size) {
+    std::vector<int> dataset(size);
+    std::generate(std::begin(dataset), std::end(dataset), [&]() {
+        static int value = 0;
+        return value++;
+    });
+    std::random_shuffle(std::begin(dataset), std::end(dataset));
+    return dataset;
+}
+
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " <items count>" << std::endl;
+        return 1;
     }
+    const auto count = std::stoll(argv[1]);
 
-    // Sum up vector c and print result divided by n, this should equal 1 within error
-    double sum = 0;
-    for (int i = 0; i < n; i++) sum += h_c[i];
-    std::cout << "final result: " << sum / n << std::endl;
-
-    // Release host memory
-    delete (h_a);
-    delete (h_b);
-    delete (h_c);
-
-    return 0;
+    const auto a = make_dataset(count);
+    const auto b = make_dataset(count);
+    const auto result = add(a, b);
+    // Correctness check
+    auto expected = std::vector<int>(count);
+    std::transform(std::begin(a), std::end(a), std::begin(b), std::begin(expected),
+                   std::plus<>{});
+    auto [result_it, expected_it] =
+        std::mismatch(std::begin(result), std::end(result), std::begin(expected),
+                      [](auto a, auto b) { return a == b; });
+    if (result_it != std::end(result)) {
+        const auto diff_idx = std::distance(std::begin(result), result_it);
+        std::cerr << "diff at index " << diff_idx << ": " << *result_it
+                  << " != " << *expected_it << std::endl;
+        return 1;
+    }
 }
