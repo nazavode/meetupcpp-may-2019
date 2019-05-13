@@ -3,18 +3,31 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(meetupcpp2019 CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/cmake)
 
-# Always enable generation of compilation database to
-# make clang tooling and vscode happy
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile commands database" FORCE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS
+    ON CACHE BOOL
+    "Generate compile commands database; set to ON to make clang tooling happy")
+set(MEETUPCPP_TRISYCL_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL CACHE PATH
+    "Path of the triSYCL source to be used when triSYCL is selected")
+set(COMPUTECPP_BITCODE
+    ptx64 CACHE STRING
+    "Bitcode generation target for ComputeCpp")
+set(TRISYCL_INCLUDE_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH
+    "triSYCL implementation include directory; defaults to vendored submodule")
+set(MEETUPCPP_SYCL
+    TriSYCL CACHE STRING
+    "SYCL implementation to be used")
 
-set(COMPUTECPP_BITCODE ptx64 CACHE STRING "Bitcode generation target for ComputeCpp" FORCE)
-set(MEETUPCPP_SYCL_SUPPORTED_VALUES triSYCL ComputeCpp)
-set(MEETUPCPP_SYCL triSYCL CACHE STRING "SYCL implementation to be used")
+# Ensure the selected SYCL is supported
+set(MEETUPCPP_SYCL_SUPPORTED_VALUES TriSYCL ComputeCpp)
 set_property(CACHE MEETUPCPP_SYCL PROPERTY STRINGS ${MEETUPCPP_SYCL_SUPPORTED_VALUES})
 if(NOT MEETUPCPP_SYCL IN_LIST MEETUPCPP_SYCL_SUPPORTED_VALUES)
-    message(FATAL_ERROR "MEETUPCPP_SYCL must be one of ${MEETUPCPP_SYCL_SUPPORTED_VALUES}")
+    message(FATAL_ERROR "MEETUPCPP_SYCL must be one of: ${MEETUPCPP_SYCL_SUPPORTED_VALUES}")
 endif()
+message(STATUS "SYCL implementation: ${MEETUPCPP_SYCL}")
 
 set(MEETUPCPP_DEFAULT_WARNINGS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
@@ -37,13 +50,15 @@ endif()
 #
 if (MEETUPCPP_SYCL MATCHES "^triSYCL$")
     # If OpenCL has been found, enable it by default
-    set(TRISYCL_OPENCL ${OpenCL_FOUND} CACHE BOOL "" FORCE)
-    # Add vendored triSYCL
-    set(TRISYCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH "" FORCE)
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/cmake)
+    set(TRISYCL_OPENCL
+        ${OpenCL_FOUND} CACHE BOOL "")
 endif()
 
 find_package(${MEETUPCPP_SYCL} REQUIRED)
+if(NOT COMMAND add_sycl_to_target)
+    message(FATAL_ERROR "Cannot find SYCL CMake helper function 'add_sycl_to_target()', "
+                        "please check your SYCL installation.")
+endif()
 
 set(sycl_example_files
     examples/vector_add_sycl_scalar.cpp
