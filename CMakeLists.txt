@@ -71,7 +71,7 @@ set(opencl_example_files
     examples/vector_add_opencl.cpp)
 
 set(cuda_example_files
-    examples/vector_add_cuda.cpp)
+    examples/vector_add_cuda.cu)
 
 #
 # Create targets for each example source file
