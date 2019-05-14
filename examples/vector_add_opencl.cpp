@@ -17,15 +17,15 @@ static const char* addKernelSource =
     "__kernel void vecAdd(  __global int *a,                      \n"
     "                       __global int *b,                      \n"
     "                       __global int *c,                      \n"
-    "                       const unsigned int n)                    \n"
-    "{                                                               \n"
-    "    //Get our global thread ID                                  \n"
-    "    int id = get_global_id(0);                                  \n"
-    "                                                                \n"
-    "    //Make sure we do not go out of bounds                      \n"
-    "    if (id < n)                                                 \n"
-    "        c[id] = a[id] + b[id];                                  \n"
-    "}                                                               \n";
+    "                       const unsigned int n)                 \n"
+    "{                                                            \n"
+    "    //Get our global thread ID                               \n"
+    "    const unsigned int id = (unsigned int) get_global_id(0); \n"
+    "                                                             \n"
+    "    //Make sure we do not go out of bounds                   \n"
+    "    if (id < n)                                              \n"
+    "        c[id] = a[id] + b[id];                               \n"
+    "}                                                            \n";
 
 std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     // We are going to operate on the common indexes subset
@@ -71,7 +71,7 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     kernel.setArg(0, device_a);
     kernel.setArg(1, device_b);
     kernel.setArg(2, device_r);
-    kernel.setArg(3, std::size(result));
+    kernel.setArg(3, static_cast<cl_uint>(std::size(result)));
 
     // Number of work items in each local work group
     cl::NDRange localSize{64};
