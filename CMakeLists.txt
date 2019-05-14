@@ -48,7 +48,7 @@ endif()
 # Setup the selected SYCL implementation
 # This will define the unary function: add_sycl_to_target(<target>)
 #
-if (MEETUPCPP_SYCL MATCHES "^triSYCL$")
+if (MEETUPCPP_SYCL MATCHES "^TriSYCL$")
     # If OpenCL has been found, enable it by default
     set(TRISYCL_OPENCL
         ${OpenCL_FOUND} CACHE BOOL "")
