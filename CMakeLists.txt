@@ -3,19 +3,19 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(meetupcpp2019 CXX)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL/cmake)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON CACHE BOOL
     "Generate compile commands database; set to ON to make clang tooling happy")
 set(MEETUPCPP_TRISYCL_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL CACHE PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL CACHE PATH
     "Path of the triSYCL source to be used when triSYCL is selected")
 set(COMPUTECPP_BITCODE
     ptx64 CACHE STRING
     "Bitcode generation target for ComputeCpp")
 set(TRISYCL_INCLUDE_DIR
-    ${CMAKE_CURRENT_SOURCE_DIR}/examples/external/triSYCL/include CACHE PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL/include CACHE PATH
     "triSYCL implementation include directory; defaults to vendored submodule")
 set(MEETUPCPP_SYCL
     TriSYCL CACHE STRING
