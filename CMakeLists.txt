@@ -18,11 +18,11 @@ set(TRISYCL_INCLUDE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/external/triSYCL/include CACHE PATH
     "triSYCL implementation include directory; defaults to vendored submodule")
 set(MEETUPCPP_SYCL
-    TriSYCL CACHE STRING
+    triSYCL CACHE STRING
     "SYCL implementation to be used")
 
 # Ensure the selected SYCL implementation is supported
-set(MEETUPCPP_SYCL_SUPPORTED_VALUES TriSYCL ComputeCpp)
+set(MEETUPCPP_SYCL_SUPPORTED_VALUES triSYCL ComputeCpp)
 set_property(CACHE MEETUPCPP_SYCL PROPERTY STRINGS ${MEETUPCPP_SYCL_SUPPORTED_VALUES})
 if(NOT MEETUPCPP_SYCL IN_LIST MEETUPCPP_SYCL_SUPPORTED_VALUES)
     message(FATAL_ERROR "MEETUPCPP_SYCL must be one of: ${MEETUPCPP_SYCL_SUPPORTED_VALUES}")
@@ -48,7 +48,7 @@ endif()
 # Setup the selected SYCL implementation
 # This will define the unary function: add_sycl_to_target(<target>)
 #
-if (MEETUPCPP_SYCL MATCHES "^TriSYCL$")
+if (MEETUPCPP_SYCL MATCHES "^triSYCL$")
     # If OpenCL has been found, enable it by default
     set(TRISYCL_OPENCL
         ${OpenCL_FOUND} CACHE BOOL "")
