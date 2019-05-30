@@ -10,12 +10,29 @@ Please feel free to steal everything you want.
 Please note that some submodules are needed to have all the stuff working properly, be
 sure to `git clone --recurse-submodules`.
 
-| Path        | What to expect                                                                                                                 |
+| Path        | What to expect |
 | ----------- | ------------------------------------------- |
 | `slides/`   | The slide deck. Nothing more, nothing less. |
 | `examples/` | Show me the code. |
+| `cmake/`    | CMake helpers, mainly intended to support [ComputeCpp](https://www.codeplay.com/products/computesuite/computecpp) and directly copied from its distribution. |
+| `external/` | All `git` submodules related to external dependencies. |
 
 ## Getting Started
+
+| Example | Depends on |
+| ------- | ---------- |
+| [vector_add_sycl.cpp](examples/vector_add_sycl.cpp) | SYCL |
+| [vector_add_sycl_scalar.cpp](examples/vector_add_sycl_scalar.cpp) | SYCL |
+| [vector_add_tmp_sycl.cpp](examples/vector_add_tmp_sycl.cpp) | SYCL |
+| [vector_add_tmp_sycl_scalar.cpp](examples/vector_add_tmp_sycl_scalar.cpp)| SYCL |
+| [vector_add_opencl.cpp](examples/vector_add_opencl.cpp)| OpenCL |
+| [vector_add_cuda.cu](examples/vector_add_cuda.cu) | CUDA |
+| [matrix_add_sycl.cpp](examples/matrix_add_sycl.cpp)| SYCL |
+
+The examples in this repo have been tested with the following SYCL implementations:
+
+ * [triSYCL](https://github.com/triSYCL/triSYCL), the open source, standard reference implementation;
+ * [ComputeCpp](https://www.codeplay.com/products/computesuite/computecpp), a commercial implementation by [codeplay](https://www.codeplay.com/) with a freely available community edition.
 
 ### SYCL and OpenCL Examples
 
