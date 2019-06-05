@@ -31,7 +31,7 @@ message(STATUS "SYCL implementation: ${MEETUPCPP_SYCL}")
 
 set(MEETUPCPP_DEFAULT_WARNINGS
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Werror -Wall -Wextra -pedantic-errors>
+        -Werror -Wall -Wextra>
     $<$<CXX_COMPILER_ID:MSVC>:
         W4>
 )
@@ -80,7 +80,7 @@ set(cuda_example_files
 foreach(example_source IN LISTS sycl_example_files)
     get_filename_component(example_target ${example_source} NAME_WE)
     add_executable(${example_target} ${example_source})
-    target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
+    target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
     # TODO wrap different add_sycl_to_target APIs with an adapter function
     if (MEETUPCPP_SYCL MATCHES "^ComputeCpp$")
         # ComputeCpp helper needs named parameters
@@ -94,7 +94,7 @@ if(OpenCL_FOUND)
     foreach(example_source IN LISTS opencl_example_files)
         get_filename_component(example_target ${example_source} NAME_WE)
         add_executable(${example_target} ${example_source})
-        target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
+        target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
         target_link_libraries(${example_target} PRIVATE OpenCL::OpenCL)
     endforeach()
 endif()
@@ -103,6 +103,6 @@ if(CMAKE_CUDA_COMPILER)
     foreach(example_source IN LISTS cuda_example_files)
         get_filename_component(example_target ${example_source} NAME_WE)
         add_executable(${example_target} ${example_source})
-        target_compile_options(${example_target} PRIVATE ${COINOP_DEFAULT_WARNINGS})
+        target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
     endforeach()
 endif()
