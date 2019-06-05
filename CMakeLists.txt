@@ -56,8 +56,9 @@ endif()
 
 find_package(${MEETUPCPP_SYCL} REQUIRED)
 if(NOT COMMAND add_sycl_to_target)
-    message(FATAL_ERROR "Cannot find SYCL CMake helper function 'add_sycl_to_target()', "
-                        "please check your SYCL installation.")
+    message(FATAL_ERROR
+        "Cannot find SYCL CMake helper function `add_sycl_to_target()`, "
+        "please check your SYCL installation.")
 endif()
 
 set(sycl_example_files
