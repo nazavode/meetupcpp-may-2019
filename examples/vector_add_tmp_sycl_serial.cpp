@@ -46,7 +46,7 @@ std::vector<T> add(const std::vector<T>& a, const std::vector<T>& b) {
             auto kb = B.template get_access<sycl::access::mode::read>(cgh);
             auto kr = R.template get_access<sycl::access::mode::write>(cgh);
 
-            // Enqueue a single, scalar task
+            // Enqueue a single, serial task
             cgh.single_task<AddKernel<T>>([=]() {  // Be sure to capture by value!
                 std::transform(std::begin(ka), std::end(ka), std::begin(kb),
                                std::begin(kr), std::plus<T>{});

@@ -61,10 +61,10 @@ if(NOT COMMAND add_sycl_to_target)
 endif()
 
 set(sycl_example_files
-    examples/vector_add_sycl_scalar.cpp
+    examples/vector_add_sycl_serial.cpp
     examples/vector_add_sycl.cpp
     examples/vector_add_tmp_sycl.cpp
-    examples/vector_add_tmp_sycl_scalar.cpp
+    examples/vector_add_tmp_sycl_serial.cpp
     examples/matrix_add_sycl.cpp)
 
 set(opencl_example_files 

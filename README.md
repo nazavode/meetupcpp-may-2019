@@ -22,9 +22,9 @@ sure to `git clone --recurse-submodules`.
 | Example | Depends on |
 | ------- | ---------- |
 | [vector_add_sycl.cpp](examples/vector_add_sycl.cpp) | SYCL |
-| [vector_add_sycl_scalar.cpp](examples/vector_add_sycl_scalar.cpp) | SYCL |
+| [vector_add_sycl_serial.cpp](examples/vector_add_sycl_serial.cpp) | SYCL |
 | [vector_add_tmp_sycl.cpp](examples/vector_add_tmp_sycl.cpp) | SYCL |
-| [vector_add_tmp_sycl_scalar.cpp](examples/vector_add_tmp_sycl_scalar.cpp)| SYCL |
+| [vector_add_tmp_sycl_serial.cpp](examples/vector_add_tmp_sycl_serial.cpp)| SYCL |
 | [vector_add_opencl.cpp](examples/vector_add_opencl.cpp)| OpenCL |
 | [vector_add_cuda.cu](examples/vector_add_cuda.cu) | CUDA |
 | [matrix_add_sycl.cpp](examples/matrix_add_sycl.cpp)| SYCL |
