@@ -51,7 +51,10 @@ endif()
 if (MEETUPCPP_SYCL MATCHES "^triSYCL$")
     # If OpenCL has been found, enable it by default
     set(TRISYCL_OPENCL
-        ${OpenCL_FOUND} CACHE BOOL "")
+        ${OpenCL_FOUND} CACHE BOOL "Enable OpenCL backend for triSYCL")
+    # Download via submodule
+    execute_process(COMMAND git submodule update --init -- external/triSYCL
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 find_package(${MEETUPCPP_SYCL} REQUIRED)
@@ -93,7 +96,7 @@ foreach(example_source IN LISTS sycl_example_files)
     add_example(${example_source} example_target)
     # TODO wrap different add_sycl_to_target APIs with an adapter function
     if (MEETUPCPP_SYCL MATCHES "^ComputeCpp$")
-        # ComputeCpp helper needs named parameters
+        # ComputeCpp helper needs sources passed in as arguments
         add_sycl_to_target(TARGET ${example_target} SOURCES ${example_source})
     else()
         add_sycl_to_target(${example_target})
