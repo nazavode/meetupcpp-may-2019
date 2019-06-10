@@ -77,10 +77,20 @@ set(cuda_example_files
 #
 # Create targets for each example source file
 #
+function(add_example IN_SOURCE OUT_TARGET)
+    get_filename_component(tgt ${IN_SOURCE} NAME_WE)
+    add_executable(${tgt} ${IN_SOURCE})
+    target_compile_options(${tgt} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
+    target_compile_features(${tgt} PRIVATE cxx_std_17)
+    set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
+    #add_test(NAME ${tgt})
+    set(${OUT_TARGET} ${tgt} PARENT_SCOPE)
+endfunction()
+
+# enable_testing()
+
 foreach(example_source IN LISTS sycl_example_files)
-    get_filename_component(example_target ${example_source} NAME_WE)
-    add_executable(${example_target} ${example_source})
-    target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
+    add_example(${example_source} example_target)
     # TODO wrap different add_sycl_to_target APIs with an adapter function
     if (MEETUPCPP_SYCL MATCHES "^ComputeCpp$")
         # ComputeCpp helper needs named parameters
@@ -92,17 +102,13 @@ endforeach()
 
 if(OpenCL_FOUND)
     foreach(example_source IN LISTS opencl_example_files)
-        get_filename_component(example_target ${example_source} NAME_WE)
-        add_executable(${example_target} ${example_source})
-        target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
+        add_example(${example_source} example_target)
         target_link_libraries(${example_target} PRIVATE OpenCL::OpenCL)
     endforeach()
 endif()
 
 if(CMAKE_CUDA_COMPILER)
     foreach(example_source IN LISTS cuda_example_files)
-        get_filename_component(example_target ${example_source} NAME_WE)
-        add_executable(${example_target} ${example_source})
-        target_compile_options(${example_target} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
+        add_example(${example_source} example_target)
     endforeach()
 endif()
