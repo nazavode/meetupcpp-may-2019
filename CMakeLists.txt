@@ -83,11 +83,11 @@ function(add_example IN_SOURCE OUT_TARGET)
     target_compile_options(${tgt} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
     target_compile_features(${tgt} PRIVATE cxx_std_17)
     set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
-    #add_test(NAME ${tgt})
+    add_test(NAME "test_${tgt}" COMMAND ${tgt} 100)
     set(${OUT_TARGET} ${tgt} PARENT_SCOPE)
 endfunction()
 
-# enable_testing()
+enable_testing()
 
 foreach(example_source IN LISTS sycl_example_files)
     add_example(${example_source} example_target)
