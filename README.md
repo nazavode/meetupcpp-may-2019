@@ -2,13 +2,12 @@
 
 This repo contains all the stuff used during the talk I gave at the
 [Italian C++ Community](https://www.italiancpp.org/) meetup in 
-[Modena, 2019-05-09](https://www.italiancpp.org/event/meetup-maggio2019/).
-Please feel free to steal everything you want.
+[Modena, 2019-05-09](https://www.italiancpp.org/event/meetup-maggio2019/)
+about GPUs and how [SYCL](https://en.wikipedia.org/wiki/SYCL) allows us
+to finally program them in a sane way.
+Please feel free to steal anything you want.
 
 ## Contents
-
-Please note that some submodules are needed to have all the stuff working properly, be
-sure to `git clone --recurse-submodules`.
 
 | Path        | What to expect |
 | ----------- | ------------------------------------------- |
@@ -19,7 +18,7 @@ sure to `git clone --recurse-submodules`.
 
 ## Getting Started
 
-The [`CMakeLists.txt`](CMakeLists.txt) provided in this repo tries to build the following examples
+The [`CMakeLists.txt`](CMakeLists.txt) provided in this repo builds the following examples
 as separate executables:
 
 | Example | Depends on | WAT? |
@@ -28,36 +27,38 @@ as separate executables:
 | [`vector_add_sycl_serial.cpp`](examples/vector_add_sycl_serial.cpp) | `SYCL` | Serial vector addition with linear accessors | 
 | [`vector_add_tmp_sycl.cpp`](examples/vector_add_tmp_sycl.cpp) | `SYCL` | Templated (on value type) parallel vector addition with linear accessors |
 | [`vector_add_tmp_sycl_serial.cpp`](examples/vector_add_tmp_sycl_serial.cpp)| `SYCL` | Templated (on value type) serial vector addition with linear accessors |
+| [`matrix_add_sycl.cpp`](examples/matrix_add_sycl.cpp)| `SYCL` | Matrix (2-dimensions) parallel addition with 2-dimensional accessors |
 | [`vector_add_opencl.cpp`](examples/vector_add_opencl.cpp)| `OpenCL` | Parallel vector addition with linear data space |
 | [`vector_add_cuda.cu`](examples/vector_add_cuda.cu) | `CUDA` | Parallel vector addition with linear data space |
-| [`matrix_add_sycl.cpp`](examples/matrix_add_sycl.cpp)| `SYCL` | Matrix (2-dimensions) parallel addition with 2-dimensional accessors |
 
-All the examples based on SYCL have been tested with the following implementations:
+`OpenCL` and `CUDA` examples are built only if a suitable implementation can be found while `SYCL` based ones are built anyway.
 
- * [`triSYCL`](https://github.com/triSYCL/triSYCL), the open source, standard reference implementation;
+All of the `SYCL` based examples have been tested with the following implementations:
+
+ * [`triSYCL`](https://github.com/triSYCL/triSYCL), the open source, standard reference implementation. **Depends on [boost](https://www.boost.org/) and a `C++` compiler that supports `OpenMP`**;
  * [`ComputeCpp`](https://www.codeplay.com/products/computesuite/computecpp), a commercial implementation by [codeplay](https://www.codeplay.com/) with a freely available community edition.
+ 
+ Please note that if `SYCL` cannot be found on the system, the `triSYCL` source tree will be automatically included via a proper `git` submodule.
+ 
 
-### Build
+### Build configuration
+
+The following `CMake` options are available:
 
 | Option | Default | Meaning |
 | ----------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
 | `MEETUPCPP_SYCL`        | `triSYCL`                 | SYCL implementation to be used; allowed values are: `triSYCL`, `ComputeCpp`                        |
 | `MEETUPCPP_TRISYCL_DIR` | `<repo>/external/triSYCL` | Path of the `triSYCL` source to be used when `triSYCL` is selected; defaults to vendored submodule |
 | `COMPUTECPP_BITCODE`    | `ptx64`                   | Bitcode generation target for ComputeCpp; defaults to NVIDIA PTX                                   |
-| `TRISYCL_OPENCL`        | `ON`                      | Use `OpenCL` execution backend; ignored when `MEETUPCPP_SYCL` isn't set to `triSYCL`               |
-
-### SYCL and OpenCL Examples
-
-In order to be able to build the examples based on SYCL you
-
-### CUDA Examples
+| `TRISYCL_OPENCL`        | `ON`                      | Use `OpenCL` execution backend; ignored when `MEETUPCPP_SYCL` isn't set to `triSYCL` or `OpenCL` isn't available               |
 
 ## Credits
 
 A lot of excellent graphics and pitches have been taken directly from publicly available
-talks across the net, I've strived really hard to put proper credits on the slides,
-so thanks everyone for your help in making my slides more clear and understandable.
+talks across the net, I've strived really hard to put proper credits on the slides but
+if you notice that something's missing please open an issue on this repo.
 
+Thanks everyone for your help in making my slides more clear and understandable.
 I'm particularly grateful to (in order of appearance):
 
 * [Karl Rupp](https://www.karlrupp.net/)
