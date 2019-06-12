@@ -55,10 +55,7 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
 
 std::vector<int> make_dataset(std::size_t size) {
     std::vector<int> dataset(size);
-    std::generate(std::begin(dataset), std::end(dataset), [&]() {
-        static int value = 0;
-        return value++;
-    });
+    std::iota(std::begin(dataset), std::end(dataset), 0);
     std::random_shuffle(std::begin(dataset), std::end(dataset));
     return dataset;
 }

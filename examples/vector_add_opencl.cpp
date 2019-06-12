@@ -1,10 +1,11 @@
 #include <algorithm>
-#include <functional>
-#include <iostream>
-#include <cstring>
-#include <vector>
 #include <cmath>
 #include <cstddef>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <numeric>
+#include <vector>
 
 #define __CL_ENABLE_EXCEPTIONS
 #ifdef __APPLE__
@@ -60,7 +61,8 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     queue.enqueueWriteBuffer(device_b, CL_TRUE, 0, size_bytes, std::data(b));
 
     // Build kernel from source string
-    cl::Program::Sources source{1, std::make_pair(addKernelSource, std::strlen(addKernelSource))};
+    cl::Program::Sources source{
+        1, std::make_pair(addKernelSource, std::strlen(addKernelSource))};
     cl::Program program = cl::Program{context, source};
     program.build(devices);
 
@@ -76,8 +78,8 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     // Number of work items in each local work group
     cl::NDRange localSize{64};
     // Number of total work items - localSize must be devisor
-    cl::NDRange globalSize{
-        static_cast<std::size_t>(std::ceil(std::size(result) / static_cast<float>(64)) * 64)};
+    cl::NDRange globalSize{static_cast<std::size_t>(
+        std::ceil(std::size(result) / static_cast<float>(64)) * 64)};
 
     // Enqueue kernel
     cl::Event event;
@@ -88,17 +90,13 @@ std::vector<int> add(const std::vector<int>& a, const std::vector<int>& b) {
     event.wait();
 
     // Read back result
-    queue.enqueueReadBuffer(device_r, CL_TRUE, 0, size_bytes,
-                            std::data(result));
+    queue.enqueueReadBuffer(device_r, CL_TRUE, 0, size_bytes, std::data(result));
     return result;
 }
 
 std::vector<int> make_dataset(std::size_t size) {
     std::vector<int> dataset(size);
-    std::generate(std::begin(dataset), std::end(dataset), [&]() {
-        static int value = 0;
-        return value++;
-    });
+    std::iota(std::begin(dataset), std::end(dataset), 0);
     std::random_shuffle(std::begin(dataset), std::end(dataset));
     return dataset;
 }

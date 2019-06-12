@@ -10,8 +10,11 @@
 #include <functional>
 #include <iostream>
 #include <random>
+#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 using namespace cl;
@@ -77,13 +80,34 @@ std::vector<T> make_dataset(std::size_t size) {
     return dataset;
 }
 
+template <typename T, typename CheckPredicate>
+void test_add(std::size_t count, CheckPredicate&& check) {
+    const auto a = make_dataset<T>(count);
+    const auto b = make_dataset<T>(count);
+    const auto result = add(a, b);
+    // Correctness check
+    auto expected = std::vector<T>(count);
+    std::transform(std::begin(a), std::end(a), std::begin(b), std::begin(expected),
+                   std::plus<>{});
+    auto [result_it, expected_it] =
+        std::mismatch(std::begin(result), std::end(result), std::begin(expected),
+                      std::forward<CheckPredicate>(check));
+    if (result_it != std::end(result)) {
+        const auto diff_idx = std::distance(std::begin(result), result_it);
+        std::ostringstream msg;
+        msg << "diff at index " << diff_idx << ": " << *result_it
+            << " != " << *expected_it << std::endl;
+        throw std::logic_error{msg.str()};
+    }
+}
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " <items count>" << std::endl;
         return 1;
     }
     const auto count = std::stoll(argv[1]);
-    // Equality checker predicate
+
     const auto equals = [](auto a, auto b) {
         using value_type = decltype(a);
         if constexpr (std::is_floating_point_v<value_type>) {
@@ -95,40 +119,8 @@ int main(int argc, char** argv) {
             return a == b;
         }
     };
-    // Integral
-    {
-        const auto a = make_dataset<int>(count);
-        const auto b = make_dataset<int>(count);
-        const auto result = add(a, b);
-        // Correctness check
-        auto expected = std::vector<int>(count);
-        std::transform(std::begin(a), std::end(a), std::begin(b), std::begin(expected),
-                       std::plus<>{});
-        auto [result_it, expected_it] = std::mismatch(
-            std::begin(result), std::end(result), std::begin(expected), equals);
-        if (result_it != std::end(result)) {
-            const auto diff_idx = std::distance(std::begin(result), result_it);
-            std::cerr << "Integral: diff at index " << diff_idx << ": " << *result_it
-                      << " != " << *expected_it << std::endl;
-            return 1;
-        }
-    }
-    // Real
-    {
-        const auto a = make_dataset<float>(count);
-        const auto b = make_dataset<float>(count);
-        const auto result = add(a, b);
-        // Correctness check
-        auto expected = std::vector<float>(count);
-        std::transform(std::begin(a), std::end(a), std::begin(b), std::begin(expected),
-                       std::plus<>{});
-        auto [result_it, expected_it] = std::mismatch(
-            std::begin(result), std::end(result), std::begin(expected), equals);
-        if (result_it != std::end(result)) {
-            const auto diff_idx = std::distance(std::begin(result), result_it);
-            std::cerr << "Real: diff at index " << diff_idx << ": " << *result_it
-                      << " != " << *expected_it << std::endl;
-            return 1;
-        }
-    }
+
+    test_add<int>(count, equals);
+    test_add<float>(count, equals);
+    test_add<double>(count, equals);
 }
