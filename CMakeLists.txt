@@ -29,13 +29,6 @@ if(NOT MEETUPCPP_SYCL IN_LIST MEETUPCPP_SYCL_SUPPORTED_VALUES)
 endif()
 message(STATUS "SYCL implementation: ${MEETUPCPP_SYCL}")
 
-set(MEETUPCPP_DEFAULT_WARNINGS
-    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
-        -Werror -Wall -Wextra>
-    $<$<CXX_COMPILER_ID:MSVC>:
-        W4>
-)
-
 find_package(OpenCL)
 
 include(CheckLanguage)
@@ -83,8 +76,25 @@ set(cuda_example_files
 function(add_example IN_SOURCE OUT_TARGET)
     get_filename_component(tgt ${IN_SOURCE} NAME_WE)
     add_executable(${tgt} ${IN_SOURCE})
-    target_compile_options(${tgt} PRIVATE ${MEETUPCPP_DEFAULT_WARNINGS})
-    target_compile_features(${tgt} PRIVATE cxx_std_17)
+    target_compile_options(${tgt}
+        PUBLIC
+            $<$<COMPILE_LANGUAGE:CXX>:
+                $<$<CXX_COMPILER_ID:MSVC>:/W4>
+                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>
+            >
+            $<$<COMPILE_LANGUAGE:CUDA>:
+                $<$<CXX_COMPILER_ID:MSVC>:--compiler-options /W4>
+                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:--compiler-options -Wall,-Wextra>
+            >
+    )
+    get_source_file_property(src_language ${IN_SOURCE} LANGUAGE)
+    if(src_language STREQUAL "CUDA")
+        # target_compile_features doesn't support $<$<COMPILE_LANGUAGE:CUDA>
+        # and nvcc is stuck to C++14, thanks nvidia
+        target_compile_features(${tgt} PRIVATE cxx_std_14)
+    else()
+        target_compile_features(${tgt} PRIVATE cxx_std_17)
+    endif()
     set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
     add_test(NAME "test_${tgt}" COMMAND ${tgt} 100)
     set(${OUT_TARGET} ${tgt} PARENT_SCOPE)

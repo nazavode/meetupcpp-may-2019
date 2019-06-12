@@ -4,6 +4,7 @@
 #include <iterator>
 #include <string>
 #include <iostream>
+#include <numeric>
 
 __global__ void add_kernel(const int* a, const int* b, int* result, int count) {
     // Get our global thread ID
