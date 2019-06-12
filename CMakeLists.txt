@@ -76,24 +76,23 @@ set(cuda_example_files
 function(add_example IN_SOURCE OUT_TARGET)
     get_filename_component(tgt ${IN_SOURCE} NAME_WE)
     add_executable(${tgt} ${IN_SOURCE})
-    target_compile_options(${tgt}
-        PUBLIC
-            $<$<COMPILE_LANGUAGE:CXX>:
-                $<$<CXX_COMPILER_ID:MSVC>:/W4>
-                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>
-            >
-            $<$<COMPILE_LANGUAGE:CUDA>:
-                $<$<CXX_COMPILER_ID:MSVC>:--compiler-options /W4>
-                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:--compiler-options -Wall,-Wextra>
-            >
-    )
     get_source_file_property(src_language ${IN_SOURCE} LANGUAGE)
+    # CMake <= 3.10 doesn't support $<$<COMPILE_LANGUAGE:CUDA> at all,
+    # we need to split target_compile_options by hand without relying
+    # on generator expressions
     if(src_language STREQUAL "CUDA")
-        # target_compile_features doesn't support $<$<COMPILE_LANGUAGE:CUDA>
-        # and nvcc is stuck to C++14, thanks nvidia
+        # nvcc is stuck to C++14, thanks nvidia
         target_compile_features(${tgt} PRIVATE cxx_std_14)
+        target_compile_options(${tgt}
+            PUBLIC
+                $<$<CXX_COMPILER_ID:MSVC>:--compiler-options /W4>
+                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:--compiler-options -Wall,-Wextra>)
     else()
         target_compile_features(${tgt} PRIVATE cxx_std_17)
+        target_compile_options(${tgt}
+            PUBLIC
+                $<$<CXX_COMPILER_ID:MSVC>:/W4>
+                $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra>)
     endif()
     set_target_properties(${tgt} PROPERTIES CXX_EXTENSIONS OFF)
     add_test(NAME "test_${tgt}" COMMAND ${tgt} 100)
