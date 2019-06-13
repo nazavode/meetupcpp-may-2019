@@ -28,17 +28,22 @@ as separate executables:
 | [`vector_add_tmp_sycl.cpp`](examples/vector_add_tmp_sycl.cpp) | `SYCL` | Templated (on value type) parallel vector addition with linear accessors |
 | [`vector_add_tmp_sycl_serial.cpp`](examples/vector_add_tmp_sycl_serial.cpp)| `SYCL` | Templated (on value type) serial vector addition with linear accessors |
 | [`matrix_add_sycl.cpp`](examples/matrix_add_sycl.cpp)| `SYCL` | Matrix (2-dimensions) parallel addition with 2-dimensional accessors |
-| [`vector_add_opencl.cpp`](examples/vector_add_opencl.cpp)| `OpenCL` | Parallel vector addition with linear data space |
-| [`vector_add_cuda.cu`](examples/vector_add_cuda.cu) | `CUDA` | Parallel vector addition with linear data space |
+| [`vector_add_opencl.cpp`](examples/vector_add_opencl.cpp)| `OpenCL` | Parallel vector addition using a linear kernel grid |
+| [`vector_add_cuda.cu`](examples/vector_add_cuda.cu) | `CUDA` | Parallel vector addition using a linear kernel grid |
 
-`OpenCL` and `CUDA` examples are built only if a suitable implementation can be found while `SYCL` based ones are built anyway.
+`OpenCL` and `CUDA` examples are built only if a suitable implementation can be found on the host 
+while `SYCL` based ones are built anyway.
 
 All of the `SYCL` based examples have been tested with the following implementations:
 
- * [`triSYCL`](https://github.com/triSYCL/triSYCL), the open source, standard reference implementation. **Depends on [boost](https://www.boost.org/) and a `C++` compiler that supports `OpenMP`**;
- * [`ComputeCpp`](https://www.codeplay.com/products/computesuite/computecpp), a commercial implementation by [codeplay](https://www.codeplay.com/) with a freely available community edition.
+ * [`triSYCL`](https://github.com/triSYCL/triSYCL), the open source, standard reference implementation.
+   **Depends on [boost](https://www.boost.org/) and a `C++` with
+   [`OpenMP` support](https://www.openmp.org/resources/openmp-compilers-tools/)**;
+ * [`ComputeCpp`](https://www.codeplay.com/products/computesuite/computecpp), a commercial implementation
+   by [codeplay](https://www.codeplay.com/) with a freely available community edition.
  
- Please note that if `SYCL` cannot be found on the system, the `triSYCL` source tree will be automatically included via a proper `git` submodule.
+ Please note that if `SYCL` cannot be found on the host, the `triSYCL` source tree will be
+ automatically downloaded and included via `git` submodule.
  
 
 ### Build configuration
@@ -50,11 +55,11 @@ The following `CMake` options are available:
 | `MEETUPCPP_SYCL`        | `triSYCL`                 | SYCL implementation to be used; allowed values are: `triSYCL`, `ComputeCpp`                        |
 | `MEETUPCPP_TRISYCL_DIR` | `<repo>/external/triSYCL` | Path of the `triSYCL` source to be used when `triSYCL` is selected; defaults to vendored submodule |
 | `COMPUTECPP_BITCODE`    | `ptx64`                   | Bitcode generation target for ComputeCpp; defaults to NVIDIA PTX                                   |
-| `TRISYCL_OPENCL`        | `ON`                      | Use `OpenCL` execution backend; ignored when `MEETUPCPP_SYCL` isn't set to `triSYCL` or `OpenCL` isn't available               |
+| `TRISYCL_OPENCL`        | `ON`                      | Use `OpenCL` execution backend; ignored when `MEETUPCPP_SYCL` isn't set to `triSYCL` or `OpenCL` isn't available |
 
 ## Credits
 
-A lot of excellent graphics and pitches have been taken directly from publicly available
+A lot of excellent charts and pitches have been taken directly from publicly available
 talks across the net, I've strived really hard to put proper credits on the slides but
 if you notice that something's missing please open an issue on this repo.
 
