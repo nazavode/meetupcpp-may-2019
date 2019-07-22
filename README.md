@@ -73,11 +73,16 @@ I'm particularly grateful to (in order of appearance):
 
 ## Resources
 
+* [`sycl.tech`](http://sycl.tech/): a comprehensive community platform that collects articles, blog posts, talks and everything related to SYCL that shows up on the web.
 * [Accelerating your C++ on GPU with SYCL by Simon Brand](https://blog.tartanllama.xyz/sycl/) - one of the nicest introductions around.
 * [Programming GPUs with SYCL by Gordon Brown](http://cppedinburgh.uk/slides/201607-sycl.pdf) - a great introduction to the whys and hows of SYCL.
-* [SYCL Developer Guide by Codeplay](https://developer.codeplay.com/products/computecpp/ce/guides/sycl-guide?) - the current lack of learning material about SYCL is appalling but this terse developer guide makes the situation a little better.
+* [SYCL Developer Guide by Codeplay](https://developer.codeplay.com/products/computecpp/ce/guides/sycl-guide?) - the current lack of learning learning material about SYCL is appalling but this terse developer guide makes the situation a little better.
 * [CppCon 2018: Parallel Programming with Modern C++ by Gordon Brown](https://github.com/AerialMantis/cppcon2018-parallelism-class) - a great overview of parallel programming and modern C++.
-* [Modern C++ for accelerators: a SYCL deep dive by Andrew Richards](https://www.khronos.org/assets/uploads/developers/library/2018-evs/EVS2018_09_Modern_Cpp_for_accelerators_andrew.pdf) - an excellent slide deck to be printed and annotated.
+* [Modern C++ for accelerators: a SYCL deep dive by Andrew Richards](https://www.khronos.org/assets/uploads/developers/library/2018-evs/EVS2018_09_Modern_Cpp_for_accelerators_andrew.pdf) - an excellent slide deck to be printed and studied.
 * [2019 EuroLLVM Developers’ Meeting: A. Savonichev (Intel) "SYCL compiler: zero-cost abstraction and type safety for heterogeneous computing"](https://youtu.be/rfg19iODkhI) - a nice insight on how Intel is working on his own SYCL implementation for LLVM; mandatory for compiler nerds.
-* [SYCL 1.2.1 API Reference Card](https://www.khronos.org/files/sycl/sycl-12-reference-card.pdf) - print and hang it on the wall next to the Picasso you just bought.
-* [SYCL Standard Specification](https://www.khronos.org/registry/SYCL/) - to be a proper standard, you need a proper spec. Not so *standardese* (actually quite educational) but definitely not a novel.
+* [SYCL 1.2.1 API Reference Card](https://www.khronos.org/files/sycl/sycl-12-reference-card.pdf) - print and hang it on the wall next to the Picasso you just bought at Sotheby's.
+* [SYCL Standard Specification](https://www.khronos.org/registry/SYCL/) - to be a proper standard, you need a proper spec. Not so *standardese* (a traightforward and educational read, actually) but definitely not a novel.
+* [GCC support for offloading to PTX via OpenACC](https://gcc.gnu.org/wiki/Offloading)
+* [Compiling CUDA with clang - LLVM 9 documentation](https://llvm.org/docs/CompileCudaWithLLVM.html)
+* [CppCon 2016: CUDA is a low-level language by Justin Lebar](https://youtu.be/KHa-OSrZPGo)
+* [`gpucc`: An Open-Source GPGPU Compiler](https://ai.google/research/pubs/pub45226)
