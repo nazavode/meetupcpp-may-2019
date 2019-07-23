@@ -86,3 +86,4 @@ I'm particularly grateful to (in order of appearance):
 * [Compiling CUDA with clang - LLVM 9 documentation](https://llvm.org/docs/CompileCudaWithLLVM.html)
 * [CppCon 2016: CUDA is a low-level language by Justin Lebar](https://youtu.be/KHa-OSrZPGo)
 * [`gpucc`: An Open-Source GPGPU Compiler](https://ai.google/research/pubs/pub45226)
+* [John Lawson et al., Cross-Platform Performance Portability Using Highly Parametrized SYCL Kernels](https://arxiv.org/pdf/1904.05347.pdf) - a very nice article about parametrizing SYCL kernels to achieve good *performance portability* across architectures.
